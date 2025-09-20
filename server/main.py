@@ -1,20 +1,16 @@
-import os
-from langchain_ollama.llms import OllamaLLM
+from fastapi import FastAPI
+from pydantic import BaseModel
+from services import ask_llm
 
-BASE_URL = os.environ.get("OLLAMA_HOST", "http://ollama.eastus.cloudapp.azure.com:11434")
-MODEL = os.environ.get("OLLAMA_MODEL", "phi3:mini")
+app = FastAPI(title="Ollama Q&A API")
 
-llm = OllamaLLM(model=MODEL, base_url=BASE_URL)
+class PromptRequest(BaseModel):
+    prompt: str
 
-def main():
-    print(f"LangChain -> Ollama @ {BASE_URL} model={MODEL}")
-    while True:
-        prompt = input("\nVocê: ")
-        if prompt.strip().lower() in ("exit","sair","quit","q"):
-            break
-        resp = llm.invoke(prompt)
-        
-        print("\nIA:", resp)
+class PromptResponse(BaseModel):
+    answer: str
 
-if __name__ == "__main__":
-    main()
+@app.post("/ask", response_model=PromptResponse)
+def ask_endpoint(request: PromptRequest):
+    answer = ask_llm(request.prompt)
+    return PromptResponse(answer=answer)

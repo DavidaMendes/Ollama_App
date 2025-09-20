@@ -2,3 +2,5 @@ requests
 ollama
 langchain-ollama
 python-dotenv
+fastapi
+uvicorn[standard]
